@@ -24,13 +24,13 @@ export function PreferencesPanel({ isOpen, onClose }: PreferencesPanelProps) {
 
   const {
     draft,
-    sourceNameInput,
-    setSourceNameInput,
+    authorInput,
+    setAuthorInput,
     handlers: {
       handleSourceToggle,
       handleCategoryToggle,
-      handleAddSourceName,
-      handleRemoveSourceName,
+      handleAddAuthor,
+      handleRemoveAuthor,
       handleReset,
     },
   } = usePreferencesForm(preferences);
@@ -107,37 +107,37 @@ export function PreferencesPanel({ isOpen, onClose }: PreferencesPanelProps) {
             </div>
           </div>
 
-          {/* Preferred Source Names */}
+          {/* Preferred Authors */}
           <div className="space-y-2">
-            <Label>Preferred Source Names</Label>
+            <Label>Preferred Authors</Label>
             <p className="text-muted-foreground text-sm">
-              Add news outlets to follow (e.g., BBC, CNN, The New York Times)
+              Add authors to follow (e.g., John Smith, Jane Doe)
             </p>
             <div className="flex gap-2">
               <Input
-                placeholder="Source name"
-                value={sourceNameInput}
-                onChange={(e) => setSourceNameInput(e.target.value)}
+                placeholder="Author name"
+                value={authorInput}
+                onChange={(e) => setAuthorInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
-                    handleAddSourceName();
+                    handleAddAuthor();
                   }
                 }}
               />
-              <Button onClick={handleAddSourceName} variant="outline">
+              <Button onClick={handleAddAuthor} variant="outline">
                 Add
               </Button>
             </div>
-            {draft.preferredSourceNames.length > 0 && (
+            {draft.preferredAuthors.length > 0 && (
               <div className="flex flex-wrap gap-2 pt-2">
-                {draft.preferredSourceNames.map((sourceName) => (
-                  <Badge key={sourceName} asChild variant="secondary">
+                {draft.preferredAuthors.map((author) => (
+                  <Badge key={author} asChild variant="secondary">
                     <button
                       type="button"
-                      onClick={() => handleRemoveSourceName(sourceName)}
+                      onClick={() => handleRemoveAuthor(author)}
                     >
-                      {sourceName}
+                      {author}
                       <X className="ml-1 size-3" />
                     </button>
                   </Badge>

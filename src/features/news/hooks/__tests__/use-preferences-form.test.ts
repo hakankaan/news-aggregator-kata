@@ -8,7 +8,7 @@ describe('usePreferencesForm', () => {
     const initial = {
       preferredSources: ['newsapi'] as NewsSource[],
       preferredCategories: ['technology'],
-      preferredSourceNames: ['BBC'],
+      preferredAuthors: ['John Smith'],
     };
 
     const { result } = renderHook(() =>
@@ -17,7 +17,7 @@ describe('usePreferencesForm', () => {
 
     expect(result.current.draft.preferredSources).toContain('newsapi');
     expect(result.current.draft.preferredCategories).toContain('technology');
-    expect(result.current.draft.preferredSourceNames).toContain('BBC');
+    expect(result.current.draft.preferredAuthors).toContain('John Smith');
   });
 
   it('should toggle source selection', () => {
@@ -52,54 +52,54 @@ describe('usePreferencesForm', () => {
     expect(result.current.draft.preferredCategories).not.toContain('technology');
   });
 
-  it('should add source name', () => {
+  it('should add author', () => {
     const { result } = renderHook(() => usePreferencesForm(DEFAULT_PREFERENCES));
 
     act(() => {
-      result.current.setSourceNameInput('BBC');
+      result.current.setAuthorInput('John Smith');
     });
 
     act(() => {
-      result.current.handlers.handleAddSourceName();
+      result.current.handlers.handleAddAuthor();
     });
 
-    expect(result.current.draft.preferredSourceNames).toContain('BBC');
-    expect(result.current.sourceNameInput).toBe('');
+    expect(result.current.draft.preferredAuthors).toContain('John Smith');
+    expect(result.current.authorInput).toBe('');
   });
 
-  it('should not add duplicate source name', () => {
+  it('should not add duplicate author', () => {
     const initial = {
       ...DEFAULT_PREFERENCES,
-      preferredSourceNames: ['BBC'],
+      preferredAuthors: ['John Smith'],
     };
 
     const { result } = renderHook(() => usePreferencesForm(initial));
 
     act(() => {
-      result.current.setSourceNameInput('BBC');
+      result.current.setAuthorInput('John Smith');
     });
 
     act(() => {
-      result.current.handlers.handleAddSourceName();
+      result.current.handlers.handleAddAuthor();
     });
 
-    expect(result.current.draft.preferredSourceNames).toHaveLength(1);
+    expect(result.current.draft.preferredAuthors).toHaveLength(1);
   });
 
-  it('should remove source name', () => {
+  it('should remove author', () => {
     const initial = {
       ...DEFAULT_PREFERENCES,
-      preferredSourceNames: ['BBC', 'CNN'],
+      preferredAuthors: ['John Smith', 'Jane Doe'],
     };
 
     const { result } = renderHook(() => usePreferencesForm(initial));
 
     act(() => {
-      result.current.handlers.handleRemoveSourceName('BBC');
+      result.current.handlers.handleRemoveAuthor('John Smith');
     });
 
-    expect(result.current.draft.preferredSourceNames).not.toContain('BBC');
-    expect(result.current.draft.preferredSourceNames).toContain('CNN');
+    expect(result.current.draft.preferredAuthors).not.toContain('John Smith');
+    expect(result.current.draft.preferredAuthors).toContain('Jane Doe');
   });
 
   it('should compute hasChanges correctly', () => {
@@ -118,7 +118,7 @@ describe('usePreferencesForm', () => {
     const initial = {
       preferredSources: ['newsapi'] as NewsSource[],
       preferredCategories: ['technology'],
-      preferredSourceNames: ['BBC'],
+      preferredAuthors: ['John Smith'],
     };
 
     const { result } = renderHook(() =>

@@ -36,24 +36,17 @@ const FeedRoute = () => {
             Personalized articles based on your preferences
           </p>
         </div>
-        <Button variant="outline" onClick={() => setShowPreferences(true)}>
+        {hasPreferences && <Button variant="outline" onClick={() => setShowPreferences(true)}>
           <Settings className="size-4" />
           Preferences
-        </Button>
+        </Button>}
       </div>
 
       {/* Preferences Info */}
       {hasPreferences ? (
         <div className="bg-muted/50 mb-6 rounded-xl p-4">
           <p className="text-sm">
-            Showing articles based on your preferences.{' '}
-            <button
-              type="button"
-              className="text-primary underline underline-offset-2"
-              onClick={() => setShowPreferences(true)}
-            >
-              Edit preferences
-            </button>
+            Showing articles based on your preferences.
           </p>
         </div>
       ) : (

@@ -8,7 +8,7 @@ import type {
 } from '../types';
 import { DEFAULT_PAGE_SIZE, NEWS_SOURCES } from '../types';
 import { adapterRegistry } from './adapter-registry';
-import { deduplicateArticles, sortByDate, filterBySourceNames } from './article-utils';
+import { deduplicateArticles, sortByDate, filterByAuthors } from './article-utils';
 
 export function createInitialPaginationState(): AggregatorPaginationState {
   return NEWS_SOURCES.reduce((acc, source) => {
@@ -112,8 +112,8 @@ export async function fetchPersonalizedFeed(
 
   const result = await fetchArticles(filters, paginationState);
 
-  if (preferences.preferredSourceNames.length > 0) {
-    const filteredItems = filterBySourceNames(result.items, preferences.preferredSourceNames);
+  if (preferences.preferredAuthors.length > 0) {
+    const filteredItems = filterByAuthors(result.items, preferences.preferredAuthors);
     return {
       ...result,
       items: filteredItems,

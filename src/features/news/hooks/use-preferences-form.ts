@@ -3,7 +3,7 @@ import { DEFAULT_PREFERENCES, type NewsSource, type UserPreferences } from '../t
 
 export function usePreferencesForm(initialPreferences: UserPreferences) {
   const [draft, setDraft] = useState<UserPreferences>(initialPreferences);
-  const [sourceNameInput, setSourceNameInput] = useState('');
+  const [authorInput, setAuthorInput] = useState('');
 
   const handleSourceToggle = useCallback((source: NewsSource) => {
     setDraft((prev) => ({
@@ -23,49 +23,49 @@ export function usePreferencesForm(initialPreferences: UserPreferences) {
     }));
   }, []);
 
-  const handleAddSourceName = useCallback(() => {
-    const trimmed = sourceNameInput.trim();
-    if (trimmed && !draft.preferredSourceNames.includes(trimmed)) {
+  const handleAddAuthor = useCallback(() => {
+    const trimmed = authorInput.trim();
+    if (trimmed && !draft.preferredAuthors.includes(trimmed)) {
       setDraft((prev) => ({
         ...prev,
-        preferredSourceNames: [...prev.preferredSourceNames, trimmed],
+        preferredAuthors: [...prev.preferredAuthors, trimmed],
       }));
-      setSourceNameInput('');
+      setAuthorInput('');
     }
-  }, [sourceNameInput, draft.preferredSourceNames]);
+  }, [authorInput, draft.preferredAuthors]);
 
-  const handleRemoveSourceName = useCallback((sourceName: string) => {
+  const handleRemoveAuthor = useCallback((author: string) => {
     setDraft((prev) => ({
       ...prev,
-      preferredSourceNames: prev.preferredSourceNames.filter((s) => s !== sourceName),
+      preferredAuthors: prev.preferredAuthors.filter((a) => a !== author),
     }));
   }, []);
 
   const handleReset = useCallback(() => {
     setDraft(DEFAULT_PREFERENCES);
-    setSourceNameInput('');
+    setAuthorInput('');
   }, []);
 
   const resetToDraft = useCallback((preferences: UserPreferences) => {
     setDraft(preferences);
-    setSourceNameInput('');
+    setAuthorInput('');
   }, []);
 
   return {
     draft,
-    sourceNameInput,
-    setSourceNameInput,
+    authorInput,
+    setAuthorInput,
     handlers: {
       handleSourceToggle,
       handleCategoryToggle,
-      handleAddSourceName,
-      handleRemoveSourceName,
+      handleAddAuthor,
+      handleRemoveAuthor,
       handleReset,
       resetToDraft,
     },
     computed: {
       hasChanges: JSON.stringify(draft) !== JSON.stringify(initialPreferences),
-      hasSourceName: sourceNameInput.trim().length > 0,
+      hasAuthor: authorInput.trim().length > 0,
     },
   };
 }

@@ -26,22 +26,23 @@ export function sortByDate(articles: Article[]): Article[] {
 }
 
 
-export function filterBySourceNames(
+export function filterByAuthors(
   articles: Article[],
-  sourceNames: string[]
+  authors: string[]
 ): Article[] {
-  if (sourceNames.length === 0) {
+  if (authors.length === 0) {
     return articles;
   }
 
-  const lowerSourceNames = sourceNames.map((name) => name.toLowerCase());
+  const lowerAuthors = authors.map((name) => name.toLowerCase());
 
   return articles.filter((article) => {
-    const articleSourceName = article.source.name.toLowerCase();
-    return lowerSourceNames.some(
-      (preferredName) =>
-        articleSourceName.includes(preferredName) ||
-        preferredName.includes(articleSourceName)
+    if (!article.author) return false;
+    const articleAuthor = article.author.toLowerCase();
+    return lowerAuthors.some(
+      (preferredAuthor) =>
+        articleAuthor.includes(preferredAuthor) ||
+        preferredAuthor.includes(articleAuthor)
     );
   });
 }

@@ -60,7 +60,7 @@ export const DEFAULT_PAGE_SIZE = 12;
 export interface UserPreferences {
   preferredSources: NewsSource[];
   preferredCategories: string[];
-  preferredSourceNames: string[];
+  preferredAuthors: string[];
 }
 
 export const CATEGORIES = [
@@ -78,5 +78,5 @@ export type Category = (typeof CATEGORIES)[number];
 export const DEFAULT_PREFERENCES: UserPreferences = {
   preferredSources: [],
   preferredCategories: [],
-  preferredSourceNames: [],
+  preferredAuthors: [],
 };
