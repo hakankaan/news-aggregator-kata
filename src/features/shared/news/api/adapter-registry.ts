@@ -1,5 +1,5 @@
-import type { AdapterResult, NewsSource, SearchFilters } from '../types';
-import { fetchFromNewsAPI } from './news-api.adapter';
+import type { AdapterResult, NewsSource } from '../types';
+import { fetchFromNewsAPI, type SearchFilters } from './news-api.adapter';
 import { fetchFromGNews } from './gnews.adapter';
 import { fetchFromNYTimes } from './nytimes.adapter';
 

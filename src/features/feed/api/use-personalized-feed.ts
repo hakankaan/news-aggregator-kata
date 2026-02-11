@@ -1,6 +1,11 @@
 import { useInfiniteQuery, infiniteQueryOptions } from '@tanstack/react-query';
-import type { UserPreferences, AggregatorPaginationState } from '../types';
-import { fetchPersonalizedFeed, createInitialPaginationState, type AggregatedResult } from './aggregator';
+import type { UserPreferences } from '../types';
+import {
+  fetchPersonalizedFeed,
+  createInitialPaginationState,
+  type AggregatedResult,
+  type AggregatorPaginationState,
+} from '@/features/shared/news';
 
 export function personalizedFeedInfiniteQueryOptions(preferences: UserPreferences) {
   return infiniteQueryOptions({

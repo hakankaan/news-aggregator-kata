@@ -2,7 +2,7 @@
 import { render, type RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement, ReactNode } from 'react';
-import { PreferencesProvider } from '@/features/news/stores/preferences-provider';
+import { PreferencesProvider } from '@/features/feed/stores/preferences-provider';
 
 function createTestQueryClient() {
   return new QueryClient({

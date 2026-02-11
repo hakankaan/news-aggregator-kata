@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { env } from '@/config/env';
-import type { AdapterResult, Article, SearchFilters } from '../types';
+import type { AdapterResult, Article } from '../types';
 import { generateArticleId } from './article-utils';
 import { mapCategoryToNYTimesSection } from './category-mapper';
 
@@ -50,6 +50,8 @@ interface NYTimesResponse {
 const BASE_URL = 'https://api.nytimes.com/svc/search/v2/articlesearch.json';
 // NYTimes API returns 10 docs per page (fixed by the API)
 const NYTIMES_PAGE_SIZE = 10;
+
+import type { SearchFilters } from './news-api.adapter';
 
 function formatDateForNYT(dateString: string): string {
   // Convert YYYY-MM-DD to YYYYMMDD

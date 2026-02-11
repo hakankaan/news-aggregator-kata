@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { env } from '@/config/env';
-import type { AdapterResult, Article, SearchFilters } from '../types';
+import type { AdapterResult, Article } from '../types';
 import { generateArticleId } from './article-utils';
 import { mapCategoryToGNewsTopic } from './category-mapper';
+import type { SearchFilters } from './news-api.adapter';
+
 
 interface GNewsArticle {
   title: string;
@@ -23,6 +25,7 @@ interface GNewsResponse {
 }
 
 const BASE_URL = 'https://gnews.io/api/v4';
+
 
 export async function fetchFromGNews(
   filters: SearchFilters,

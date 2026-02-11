@@ -44,24 +44,7 @@ export interface SourcePaginationState {
 
 export type AggregatorPaginationState = Record<NewsSource, SourcePaginationState>;
 
-export interface SearchFilters {
-  keyword?: string;
-  dateFrom?: string;
-  dateTo?: string;
-  category?: string;
-  categories?: string[];
-  sources?: NewsSource[];
-  page?: number;
-  pageSize?: number;
-}
-
 export const DEFAULT_PAGE_SIZE = 12;
-
-export interface UserPreferences {
-  preferredSources: NewsSource[];
-  preferredCategories: string[];
-  preferredAuthors: string[];
-}
 
 export const CATEGORIES = [
   'general',
@@ -74,9 +57,3 @@ export const CATEGORIES = [
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
-
-export const DEFAULT_PREFERENCES: UserPreferences = {
-  preferredSources: [],
-  preferredCategories: [],
-  preferredAuthors: [],
-};

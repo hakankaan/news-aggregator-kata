@@ -1,6 +1,11 @@
 import { useInfiniteQuery, infiniteQueryOptions } from '@tanstack/react-query';
-import type { SearchFilters, AggregatorPaginationState } from '../types';
-import { fetchArticles, createInitialPaginationState, type AggregatedResult } from './aggregator';
+import type { SearchFilters } from '../types';
+import {
+  fetchArticles,
+  createInitialPaginationState,
+  type AggregatedResult,
+  type AggregatorPaginationState,
+} from '@/features/shared/news';
 
 export function searchArticlesInfiniteQueryOptions(
   filters: Omit<SearchFilters, 'page'>

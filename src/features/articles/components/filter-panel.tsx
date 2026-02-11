@@ -4,7 +4,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { CATEGORIES, NEWS_SOURCES, type SearchFilters } from '../types';
+import { CATEGORIES, NEWS_SOURCES } from '@/features/shared/news';
+import type { SearchFilters } from '../types';
 import { useFilterHandlers } from '../hooks';
 
 interface FilterPanelProps {

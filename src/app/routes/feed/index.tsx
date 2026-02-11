@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useInfinitePersonalizedFeed } from '@/features/news/api/use-personalized-feed';
-import { usePreferences } from '@/features/news/stores/use-preferences';
-import { InfiniteArticleList, PreferencesPanel } from '@/features/news/components';
+import { useInfinitePersonalizedFeed } from '@/features/feed/api/use-personalized-feed';
+import { usePreferences } from '@/features/feed/stores/use-preferences';
+import { PreferencesPanel } from '@/features/feed/components';
+import { PreferencesProvider } from '@/features/feed/stores/preferences-provider';
+import { InfiniteArticleList } from '@/features/shared/news/components';
 import { Link } from '@/components/ui/link';
 import { paths } from '@/config/paths';
 
-const FeedRoute = () => {
+const FeedContent = () => {
   const [showPreferences, setShowPreferences] = useState(false);
   const { preferences } = usePreferences();
 
@@ -87,5 +89,11 @@ const FeedRoute = () => {
     </div>
   );
 };
+
+const FeedRoute = () => (
+  <PreferencesProvider>
+    <FeedContent />
+  </PreferencesProvider>
+);
 
 export default FeedRoute;

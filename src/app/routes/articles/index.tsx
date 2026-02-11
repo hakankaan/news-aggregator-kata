@@ -1,11 +1,8 @@
 import { useState } from 'react';
-import { useInfiniteSearchArticles } from '@/features/news/api/use-infinite-search-articles';
-import type { SearchFilters } from '@/features/news/types';
-import {
-  InfiniteArticleList,
-  SearchBar,
-  FilterPanel,
-} from '@/features/news/components';
+import { useInfiniteSearchArticles } from '@/features/articles/api/use-infinite-search-articles';
+import type { SearchFilters } from '@/features/articles/types';
+import { SearchBar, FilterPanel } from '@/features/articles/components';
+import { InfiniteArticleList } from '@/features/shared/news/components';
 
 const NewsRoute = () => {
   const [filters, setFilters] = useState<Omit<SearchFilters, 'page'>>({});

@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { CATEGORIES, NEWS_SOURCES } from '../types';
+import { CATEGORIES, NEWS_SOURCES } from '@/features/shared/news';
 import { usePreferences } from '../stores/use-preferences';
 import { usePreferencesForm } from '../hooks';
 

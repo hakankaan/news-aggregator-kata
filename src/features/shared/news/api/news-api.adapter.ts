@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { env } from '@/config/env';
-import type { AdapterResult, Article, SearchFilters } from '../types';
+import type { AdapterResult, Article, NewsSource } from '../types';
 import { generateArticleId } from './article-utils';
 
 interface NewsAPIArticle {
@@ -24,6 +24,17 @@ interface NewsAPIResponse {
 }
 
 const BASE_URL = 'https://newsapi.org/v2';
+
+export interface SearchFilters {
+  keyword?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  category?: string;
+  categories?: string[];
+  sources?: NewsSource[];
+  page?: number;
+  pageSize?: number;
+}
 
 export async function fetchFromNewsAPI(
   filters: SearchFilters,

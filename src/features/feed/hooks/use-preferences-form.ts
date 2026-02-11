@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { DEFAULT_PREFERENCES, type NewsSource, type UserPreferences } from '../types';
+import type { NewsSource } from '@/features/shared/news';
+import { DEFAULT_PREFERENCES, type UserPreferences } from '../types';
 
 export function usePreferencesForm(initialPreferences: UserPreferences) {
   const [draft, setDraft] = useState<UserPreferences>(initialPreferences);

@@ -1,7 +1,5 @@
 import type {
   Article,
-  SearchFilters,
-  UserPreferences,
   PaginatedResult,
   AggregatorPaginationState,
   NewsSource,
@@ -9,6 +7,13 @@ import type {
 import { DEFAULT_PAGE_SIZE, NEWS_SOURCES } from '../types';
 import { adapterRegistry } from './adapter-registry';
 import { deduplicateArticles, sortByDate, filterByAuthors } from './article-utils';
+import type { SearchFilters } from './news-api.adapter';
+
+export interface UserPreferences {
+  preferredSources: NewsSource[];
+  preferredCategories: string[];
+  preferredAuthors: string[];
+}
 
 export function createInitialPaginationState(): AggregatorPaginationState {
   return NEWS_SOURCES.reduce((acc, source) => {

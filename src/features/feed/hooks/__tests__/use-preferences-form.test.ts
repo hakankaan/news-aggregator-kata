@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { usePreferencesForm } from '../use-preferences-form';
-import { DEFAULT_PREFERENCES, type NewsSource } from '../../types';
+import { DEFAULT_PREFERENCES } from '../../types';
+import type { NewsSource } from '@/features/shared/news';
 
 describe('usePreferencesForm', () => {
   it('should initialize with provided preferences', () => {

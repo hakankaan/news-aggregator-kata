@@ -7,7 +7,6 @@ import { MainErrorFallback } from '@/components/errors/main';
 import { Spinner } from '@/components/ui/spinner';
 import { queryConfig } from '@/lib/react-query';
 import { Toaster } from '@/components/ui/sonner';
-import { PreferencesProvider } from '@/features/news/stores/preferences-provider';
 
 type AppProviderProps = {
   children: React.ReactNode;
@@ -31,11 +30,9 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     >
       <ErrorBoundary FallbackComponent={MainErrorFallback}>
         <QueryClientProvider client={queryClient}>
-          <PreferencesProvider>
-            {import.meta.env.DEV && <ReactQueryDevtools />}
-            <Toaster />
-            {children}
-          </PreferencesProvider>
+          {import.meta.env.DEV && <ReactQueryDevtools />}
+          <Toaster />
+          {children}
         </QueryClientProvider>
       </ErrorBoundary>
     </React.Suspense>

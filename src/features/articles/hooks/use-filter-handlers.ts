@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
-import type { NewsSource, SearchFilters } from '../types';
+import type { NewsSource } from '@/features/shared/news';
+import type { SearchFilters } from '../types';
 
 
 export function useFilterHandlers(
