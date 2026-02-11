@@ -4,13 +4,12 @@ export const paths = {
     getHref: () => '/',
   },
 
-  news: {
-    path: '/news',
-    getHref: () => '/news',
+  articles: {
+    path: '/articles',
+    getHref: () => '/articles',
   },
-  newsDetails: {
-    path: '/news/:newsId',
-    getHref: (id: string) => `/news/${id}`,
+  feed: {
+    path: '/feed',
+    getHref: () => '/feed',
   },
-
 } as const;

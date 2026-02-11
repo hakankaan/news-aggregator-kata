@@ -3,11 +3,11 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import * as React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-
 import { MainErrorFallback } from '@/components/errors/main';
 import { Spinner } from '@/components/ui/spinner';
 import { queryConfig } from '@/lib/react-query';
 import { Toaster } from '@/components/ui/sonner';
+import { PreferencesProvider } from '@/features/news/stores/preferences-provider';
 
 type AppProviderProps = {
   children: React.ReactNode;
@@ -31,9 +31,11 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     >
       <ErrorBoundary FallbackComponent={MainErrorFallback}>
         <QueryClientProvider client={queryClient}>
-          {import.meta.env.DEV && <ReactQueryDevtools />}
-          <Toaster />
-          {children}
+          <PreferencesProvider>
+            {import.meta.env.DEV && <ReactQueryDevtools />}
+            <Toaster />
+            {children}
+          </PreferencesProvider>
         </QueryClientProvider>
       </ErrorBoundary>
     </React.Suspense>

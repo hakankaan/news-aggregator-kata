@@ -23,11 +23,31 @@ const convert = (queryClient: QueryClient) => (m: LazyRouteModule) => {
   };
 };
 
+import { paths } from '@/config/paths';
+import { RootLayout } from './layouts/root-layout';
+
 const createAppRouter = (queryClient: QueryClient) =>
   createBrowserRouter([
     {
-      path: '*',
-      lazy: () => import('./routes/not-found.tsx').then(convert(queryClient)),
+      element: <RootLayout />,
+      children: [
+        {
+          path: paths.home.path,
+          lazy: () => import('./routes/articles/index.tsx').then(convert(queryClient)),
+        },
+        {
+          path: paths.articles.path,
+          lazy: () => import('./routes/articles/index.tsx').then(convert(queryClient)),
+        },
+        {
+          path: paths.feed.path,
+          lazy: () => import('./routes/feed/index.tsx').then(convert(queryClient)),
+        },
+        {
+          path: '*',
+          lazy: () => import('./routes/not-found.tsx').then(convert(queryClient)),
+        },
+      ],
     },
   ]);
 

@@ -2,8 +2,10 @@ import * as z from 'zod';
 
 const createEnv = () => {
   const EnvSchema = z.object({
-    API_URL: z.string(),
     APP_URL: z.string().optional().default('http://localhost:3000'),
+    NEWSAPI_KEY: z.string().optional().default(''),
+    GNEWS_KEY: z.string().optional().default(''),
+    NYTIMES_KEY: z.string().optional().default(''),
   });
 
   const envVars = Object.entries(import.meta.env).reduce<

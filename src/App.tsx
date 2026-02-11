@@ -1,7 +1,12 @@
-import { ComponentExample } from "@/components/component-example";
+import { AppProvider } from '@/app/provider';
+import { AppRouter } from '@/app/router';
 
 export function App() {
-return <ComponentExample />;
+  return (
+    <AppProvider>
+      <AppRouter />
+    </AppProvider>
+  );
 }
 
 export default App;
