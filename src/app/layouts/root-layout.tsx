@@ -19,17 +19,17 @@ export const RootLayout = () => {
         <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           <NavLink to={paths.home.getHref()} className="flex items-center gap-2 font-bold text-xl hover:opacity-80">
             <Newspaper className="size-6" />
-            <span>NewsHub</span>
+            <span className='hidden sm:block'>News Aggregator</span>
           </NavLink>
 
           <nav className="flex items-center gap-1">
+            <NavLink to={paths.home.getHref()} className={linkClass}>
+              <Sparkles className="size-4" />
+              My Feed
+            </NavLink>
             <NavLink to={paths.articles.getHref()} className={linkClass}>
               <Newspaper className="size-4" />
               All Articles
-            </NavLink>
-            <NavLink to={paths.feed.getHref()} className={linkClass}>
-              <Sparkles className="size-4" />
-              My Feed
             </NavLink>
           </nav>
         </div>

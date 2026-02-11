@@ -8,8 +8,4 @@ export const paths = {
     path: '/articles',
     getHref: () => '/articles',
   },
-  feed: {
-    path: '/feed',
-    getHref: () => '/feed',
-  },
 } as const;

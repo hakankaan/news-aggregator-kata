@@ -23,13 +23,15 @@ export function ArticleCard({ article }: ArticleCardProps) {
 
   return (
     <Card className="h-full">
-      {article.imageUrl && (
+      {article.imageUrl ? (
         <img
           src={article.imageUrl}
           alt={article.title}
           className="h-48 w-full object-cover"
           loading="lazy"
         />
+      ) : (
+        <div className="h-48 w-full bg-muted" />
       )}
       <CardHeader>
         <div className="flex flex-wrap gap-2">
@@ -45,7 +47,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
           {article.description}
         </p>
       </CardContent>
-      <CardFooter className="justify-between gap-2">
+      <CardFooter className="justify-between gap-2 py-2">
         {article.author ? <span
           className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm transition-colors"
         >

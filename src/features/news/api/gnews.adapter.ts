@@ -1,5 +1,8 @@
+import axios from 'axios';
 import { env } from '@/config/env';
 import type { Article, SearchFilters } from '../types';
+import { generateArticleId } from './article-utils';
+import { mapCategoryToGNewsTopic } from './category-mapper';
 
 interface GNewsArticle {
   title: string;
@@ -56,13 +59,8 @@ export async function fetchFromGNews(
   }
 
   try {
-    const response = await fetch(`${BASE_URL}${endpoint}?${params}`);
-    if (!response.ok) {
-      throw new Error(`GNews error: ${response.status}`);
-    }
-
-    const data: GNewsResponse = await response.json();
-    return data.articles.map((article) =>
+    const response = await axios.get<GNewsResponse>(`${BASE_URL}${endpoint}?${params}`);
+    return response.data.articles.map((article) =>
       transformGNewsArticle(article, filters.category)
     );
   } catch (error) {
@@ -71,25 +69,12 @@ export async function fetchFromGNews(
   }
 }
 
-function mapCategoryToGNewsTopic(category: string): string {
-  const mapping: Record<string, string> = {
-    general: 'world',
-    business: 'business',
-    technology: 'technology',
-    science: 'science',
-    health: 'health',
-    sports: 'sports',
-    entertainment: 'entertainment',
-  };
-  return mapping[category] ?? 'world';
-}
-
 function transformGNewsArticle(
   article: GNewsArticle,
   requestedCategory?: string
 ): Article {
   return {
-    id: `gnews-${btoa(article.url).slice(0, 20)}`,
+    id: generateArticleId('gnews', article.url),
     title: article.title,
     description: article.description,
     content: article.content,

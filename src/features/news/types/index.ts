@@ -1,5 +1,12 @@
 export type NewsSource = 'newsapi' | 'gnews' | 'nytimes';
 
+/** Available news sources with display names */
+export const NEWS_SOURCES: { id: NewsSource; name: string }[] = [
+  { id: 'newsapi', name: 'NewsAPI' },
+  { id: 'gnews', name: 'GNews' },
+  { id: 'nytimes', name: 'NY Times' },
+] as const;
+
 export interface Article {
   id: string;
   title: string;

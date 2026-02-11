@@ -1,5 +1,7 @@
+import axios from 'axios';
 import { env } from '@/config/env';
 import type { Article, SearchFilters } from '../types';
+import { generateArticleId } from './article-utils';
 
 interface NewsAPIArticle {
   source: {
@@ -42,7 +44,6 @@ export async function fetchFromNewsAPI(
   if (filters.keyword) {
     params.set('q', filters.keyword);
   } else {
-    // NewsAPI requires a query for /everything endpoint
     endpoint = '/top-headlines';
     params.set('language', 'en');
   }
@@ -60,13 +61,8 @@ export async function fetchFromNewsAPI(
   }
 
   try {
-    const response = await fetch(`${BASE_URL}${endpoint}?${params}`);
-    if (!response.ok) {
-      throw new Error(`NewsAPI error: ${response.status}`);
-    }
-
-    const data: NewsAPIResponse = await response.json();
-    return data.articles.map((article) =>
+    const response = await axios.get<NewsAPIResponse>(`${BASE_URL}${endpoint}?${params}`);
+    return response.data.articles.map((article) =>
       transformNewsAPIArticle(article, filters.category)
     );
   } catch (error) {
@@ -80,7 +76,7 @@ function transformNewsAPIArticle(
   requestedCategory?: string
 ): Article {
   return {
-    id: `newsapi-${btoa(article.url).slice(0, 20)}`,
+    id: generateArticleId('newsapi', article.url),
     title: article.title,
     description: article.description ?? '',
     content: article.content ?? '',

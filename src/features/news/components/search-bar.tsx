@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useDebouncedValue } from '@/lib/use-debounced-value';
 
 interface SearchBarProps {
   value: string;
@@ -14,20 +15,20 @@ export function SearchBar({
   placeholder = 'Search articles...',
 }: SearchBarProps) {
   const [localValue, setLocalValue] = useState(value);
+  const debouncedValue = useDebouncedValue(localValue, 300);
 
+  // Sync external value changes
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
 
+  // Trigger onChange when debounced value changes
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (localValue !== value) {
-        onChange(localValue);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [localValue, value, onChange]);
+    if (debouncedValue === value) {
+      return
+    }
+    onChange(debouncedValue);
+  }, [debouncedValue, value, onChange]);
 
   return (
     <div className="relative">
@@ -37,7 +38,7 @@ export function SearchBar({
         placeholder={placeholder}
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
-        className="pl-10"
+        className="pl-10 h-10"
       />
     </div>
   );

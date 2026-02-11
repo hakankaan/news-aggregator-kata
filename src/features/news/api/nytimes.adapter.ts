@@ -1,5 +1,8 @@
+import axios from 'axios';
 import { env } from '@/config/env';
 import type { Article, SearchFilters } from '../types';
+import { generateArticleId } from './article-utils';
+import { mapCategoryToNYTimesSection } from './category-mapper';
 
 interface NYTimesHeadline {
   main: string;
@@ -12,10 +15,17 @@ interface NYTimesByline {
   person: { firstname: string; lastname: string }[];
 }
 
-interface NYTimesMultimedia {
+interface NYTimesMultimediaItem {
   url: string;
   type: string;
   subtype: string;
+}
+
+interface NYTimesMultimediaObject {
+  default?: { url: string; height: number; width: number };
+  thumbnail?: { url: string; height: number; width: number };
+  caption?: string;
+  credit?: string;
 }
 
 interface NYTimesDoc {
@@ -26,14 +36,14 @@ interface NYTimesDoc {
   byline: NYTimesByline;
   section_name: string;
   pub_date: string;
-  multimedia: NYTimesMultimedia[];
+  multimedia: NYTimesMultimediaItem[] | NYTimesMultimediaObject | null;
   web_url: string;
 }
 
 interface NYTimesResponse {
   status: string;
   response: {
-    docs: NYTimesDoc[];
+    docs: NYTimesDoc[] | null;
   };
 }
 
@@ -42,19 +52,6 @@ const BASE_URL = 'https://api.nytimes.com/svc/search/v2/articlesearch.json';
 function formatDateForNYT(dateString: string): string {
   // Convert YYYY-MM-DD to YYYYMMDD
   return dateString.replace(/-/g, '');
-}
-
-function mapCategoryToSection(category: string): string {
-  const mapping: Record<string, string> = {
-    general: 'U.S.',
-    business: 'Business',
-    technology: 'Technology',
-    science: 'Science',
-    health: 'Health',
-    sports: 'Sports',
-    entertainment: 'Arts',
-  };
-  return mapping[category] ?? 'U.S.';
 }
 
 export async function fetchFromNYTimes(
@@ -83,18 +80,13 @@ export async function fetchFromNYTimes(
   }
 
   if (filters.category) {
-    const section = mapCategoryToSection(filters.category);
+    const section = mapCategoryToNYTimesSection(filters.category);
     params.set('fq', `section_name:("${section}")`);
   }
 
   try {
-    const response = await fetch(`${BASE_URL}?${params}`);
-    if (!response.ok) {
-      throw new Error(`NY Times API error: ${response.status}`);
-    }
-
-    const data: NYTimesResponse = await response.json();
-    return data.response.docs.map((doc) =>
+    const response = await axios.get<NYTimesResponse>(`${BASE_URL}?${params}`);
+    return (response.data.response.docs ?? []).map((doc) =>
       transformNYTimesDoc(doc, filters.category)
     );
   } catch (error) {
@@ -118,15 +110,24 @@ function transformNYTimesDoc(
 
   // Find image URL from multimedia
   let imageUrl: string | null = null;
-  const image = doc.multimedia?.find(
-    (m) => m.type === 'image' && m.subtype === 'xlarge'
-  );
-  if (image?.url) {
-    imageUrl = `https://www.nytimes.com/${image.url}`;
+  if (Array.isArray(doc.multimedia)) {
+    // Handle array format
+    const image = doc.multimedia.find(
+      (m) => m.type === 'image' && m.subtype === 'xlarge'
+    );
+    if (image?.url) {
+      imageUrl = `https://www.nytimes.com/${image.url}`;
+    }
+  } else if (doc.multimedia && typeof doc.multimedia === 'object') {
+    // Handle object format with default/thumbnail properties
+    const url = doc.multimedia.default?.url ?? doc.multimedia.thumbnail?.url;
+    if (url) {
+      imageUrl = url;
+    }
   }
 
   return {
-    id: `nytimes-${btoa(doc._id).slice(0, 20)}`,
+    id: generateArticleId('nytimes', doc._id),
     title: doc.headline.main,
     description: doc.abstract,
     content: doc.lead_paragraph,

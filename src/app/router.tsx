@@ -33,15 +33,11 @@ const createAppRouter = (queryClient: QueryClient) =>
       children: [
         {
           path: paths.home.path,
-          lazy: () => import('./routes/articles/index.tsx').then(convert(queryClient)),
+          lazy: () => import('./routes/feed/index.tsx').then(convert(queryClient)),
         },
         {
           path: paths.articles.path,
           lazy: () => import('./routes/articles/index.tsx').then(convert(queryClient)),
-        },
-        {
-          path: paths.feed.path,
-          lazy: () => import('./routes/feed/index.tsx').then(convert(queryClient)),
         },
         {
           path: '*',
