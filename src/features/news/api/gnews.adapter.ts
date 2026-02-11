@@ -54,8 +54,10 @@ export async function fetchFromGNews(
     params.set('to', filters.dateTo);
   }
 
-  if (filters.category) {
-    params.set('topic', mapCategoryToGNewsTopic(filters.category));
+  // GNews only supports single category - use first from array or single category
+  const category = filters.categories?.[0] ?? filters.category;
+  if (category) {
+    params.set('topic', mapCategoryToGNewsTopic(category));
   }
 
   try {

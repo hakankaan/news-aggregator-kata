@@ -29,6 +29,7 @@ export interface SearchFilters {
   dateFrom?: string;
   dateTo?: string;
   category?: string;
+  categories?: string[];
   sources?: NewsSource[];
 }
 

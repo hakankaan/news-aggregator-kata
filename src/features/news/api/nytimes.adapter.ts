@@ -79,9 +79,18 @@ export async function fetchFromNYTimes(
     params.set('end_date', formatDateForNYT(filters.dateTo));
   }
 
-  if (filters.category) {
-    const section = mapCategoryToNYTimesSection(filters.category);
-    params.set('fq', `section_name:("${section}")`);
+  // Build filter query conditions (combined with AND)
+  const fqConditions: string[] = [];
+
+  // Handle multiple categories (OR) or single category
+  const categoriesToFilter = filters.categories ?? (filters.category ? [filters.category] : []);
+  if (categoriesToFilter.length > 0) {
+    const sections = categoriesToFilter.map((cat) => `"${mapCategoryToNYTimesSection(cat)}"`);
+    fqConditions.push(`section.name:(${sections.join(' ')})`);
+  }
+
+  if (fqConditions.length > 0) {
+    params.set('fq', fqConditions.join(' AND '));
   }
 
   try {

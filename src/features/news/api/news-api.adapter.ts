@@ -56,8 +56,10 @@ export async function fetchFromNewsAPI(
     params.set('to', filters.dateTo);
   }
 
-  if (filters.category && !filters.keyword) {
-    params.set('category', filters.category);
+  // NewsAPI only supports single category - use first from array or single category
+  const category = filters.categories?.[0] ?? filters.category;
+  if (category && !filters.keyword) {
+    params.set('category', category);
   }
 
   try {

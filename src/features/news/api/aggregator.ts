@@ -23,7 +23,7 @@ export async function fetchPersonalizedFeed(
   }
 
   if (preferences.preferredCategories.length > 0) {
-    filters.category = preferences.preferredCategories[0];
+    filters.categories = preferences.preferredCategories;
   }
 
   const articles = await fetchArticles(filters);
