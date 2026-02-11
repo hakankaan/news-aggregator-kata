@@ -72,7 +72,7 @@ export async function fetchFromGNews(
     const response = await axios.get<GNewsResponse>(`${BASE_URL}${endpoint}?${params}`);
     const { totalArticles, articles } = response.data;
     const transformedArticles = articles.map((article) =>
-      transformGNewsArticle(article, filters.category)
+      transformGNewsArticle(article, category)
     );
 
     const fetchedSoFar = page * clampedPageSize;

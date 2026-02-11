@@ -82,7 +82,7 @@ export async function fetchFromNewsAPI(
     const response = await axios.get<NewsAPIResponse>(`${BASE_URL}${endpoint}?${params}`);
     const { totalResults, articles } = response.data;
     const transformedArticles = articles.map((article) =>
-      transformNewsAPIArticle(article, filters.category)
+      transformNewsAPIArticle(article, category)
     );
 
     const fetchedSoFar = page * clampedPageSize;

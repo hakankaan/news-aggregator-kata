@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from 'date-fns';
 import { ExternalLink, User } from 'lucide-react';
-import type { Article } from '../types';
+import { NEWS_SOURCES, type Article } from '../types';
 import {
   Card,
   CardContent,
@@ -37,7 +37,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
         <div className="flex flex-wrap gap-2">
           <Badge variant="secondary">{article.source.name}</Badge>
           <Badge variant="outline">{article.category}</Badge>
-          <Badge>{article.source.provider}</Badge>
+          <Badge>{NEWS_SOURCES.find((source) => source.id === article.source.provider)?.name}</Badge>
         </div>
         <CardTitle className="line-clamp-2">{article.title}</CardTitle>
         <CardDescription>{timeAgo}</CardDescription>
