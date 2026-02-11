@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { env } from '@/config/env';
-import type { Article, SearchFilters } from '../types';
+import type { AdapterResult, Article, SearchFilters } from '../types';
 import { generateArticleId } from './article-utils';
 import { mapCategoryToNYTimesSection } from './category-mapper';
 
@@ -48,6 +48,8 @@ interface NYTimesResponse {
 }
 
 const BASE_URL = 'https://api.nytimes.com/svc/search/v2/articlesearch.json';
+// NYTimes API returns 10 docs per page (fixed by the API)
+const NYTIMES_PAGE_SIZE = 10;
 
 function formatDateForNYT(dateString: string): string {
   // Convert YYYY-MM-DD to YYYYMMDD
@@ -55,16 +57,21 @@ function formatDateForNYT(dateString: string): string {
 }
 
 export async function fetchFromNYTimes(
-  filters: SearchFilters
-): Promise<Article[]> {
+  filters: SearchFilters,
+  page: number = 1,
+): Promise<AdapterResult> {
   const apiKey = env.NYTIMES_KEY;
   if (!apiKey) {
     console.warn('NY Times API key not configured');
-    return [];
+    return { articles: [], hasMore: false };
   }
+
+
+  const nytPage = Math.min(page - 1, 200);
 
   const params = new URLSearchParams({
     'api-key': apiKey,
+    page: String(nytPage),
   });
 
   if (filters.keyword) {
@@ -79,10 +86,8 @@ export async function fetchFromNYTimes(
     params.set('end_date', formatDateForNYT(filters.dateTo));
   }
 
-  // Build filter query conditions (combined with AND)
   const fqConditions: string[] = [];
 
-  // Handle multiple categories (OR) or single category
   const categoriesToFilter = filters.categories ?? (filters.category ? [filters.category] : []);
   if (categoriesToFilter.length > 0) {
     const sections = categoriesToFilter.map((cat) => `"${mapCategoryToNYTimesSection(cat)}"`);
@@ -95,12 +100,20 @@ export async function fetchFromNYTimes(
 
   try {
     const response = await axios.get<NYTimesResponse>(`${BASE_URL}?${params}`);
-    return (response.data.response.docs ?? []).map((doc) =>
+    const docs = response.data.response.docs ?? [];
+    const transformedArticles = docs.map((doc) =>
       transformNYTimesDoc(doc, filters.category)
     );
+
+    const hasMore = docs.length === NYTIMES_PAGE_SIZE && nytPage < 200;
+
+    return {
+      articles: transformedArticles,
+      hasMore,
+    };
   } catch (error) {
     console.error('NY Times API fetch error:', error);
-    return [];
+    return { articles: [], hasMore: false };
   }
 }
 
@@ -108,7 +121,6 @@ function transformNYTimesDoc(
   doc: NYTimesDoc,
   requestedCategory?: string
 ): Article {
-  // Extract author from byline
   let author;
   if (doc.byline?.original) {
     author = doc.byline.original.replace(/^By\s+/i, '');
@@ -117,10 +129,8 @@ function transformNYTimesDoc(
     author = `${person.firstname} ${person.lastname}`;
   }
 
-  // Find image URL from multimedia
   let imageUrl: string | null = null;
   if (Array.isArray(doc.multimedia)) {
-    // Handle array format
     const image = doc.multimedia.find(
       (m) => m.type === 'image' && m.subtype === 'xlarge'
     );
@@ -128,7 +138,6 @@ function transformNYTimesDoc(
       imageUrl = `https://www.nytimes.com/${image.url}`;
     }
   } else if (doc.multimedia && typeof doc.multimedia === 'object') {
-    // Handle object format with default/thumbnail properties
     const url = doc.multimedia.default?.url ?? doc.multimedia.thumbnail?.url;
     if (url) {
       imageUrl = url;

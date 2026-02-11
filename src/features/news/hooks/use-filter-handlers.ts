@@ -2,10 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 import type { NewsSource, SearchFilters } from '../types';
 
-/**
- * Headless hook for managing filter panel state.
- * Separates filter logic from UI presentation.
- */
+
 export function useFilterHandlers(
   filters: SearchFilters,
   onFiltersChange: (filters: SearchFilters) => void

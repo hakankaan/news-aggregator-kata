@@ -20,9 +20,7 @@ const FeedRoute = () => {
     error,
   } = useInfinitePersonalizedFeed({ preferences });
 
-  // Flatten all pages into a single array of articles
   const articles = data?.pages.flatMap((page) => page.items) ?? [];
-  const totalCount = data?.pages[0]?.totalCount ?? 0;
 
   const hasPreferences =
     preferences.preferredSources.length > 0 ||
@@ -74,13 +72,6 @@ const FeedRoute = () => {
             </Link>
           </p>
         </div>
-      )}
-
-      {/* Results count */}
-      {hasPreferences && !isLoading && totalCount > 0 && (
-        <p className="text-muted-foreground mb-4 text-sm">
-          Showing {articles.length} of {totalCount} articles
-        </p>
       )}
 
       {/* Articles with Infinite Scroll */}

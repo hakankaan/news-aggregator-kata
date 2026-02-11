@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { env } from '@/config/env';
-import type { Article, SearchFilters } from '../types';
+import type { AdapterResult, Article, SearchFilters } from '../types';
 import { generateArticleId } from './article-utils';
 import { mapCategoryToGNewsTopic } from './category-mapper';
 
@@ -25,18 +25,24 @@ interface GNewsResponse {
 const BASE_URL = 'https://gnews.io/api/v4';
 
 export async function fetchFromGNews(
-  filters: SearchFilters
-): Promise<Article[]> {
+  filters: SearchFilters,
+  page: number = 1,
+  pageSize: number = 10
+): Promise<AdapterResult> {
   const apiKey = env.GNEWS_KEY;
   if (!apiKey) {
     console.warn('GNews key not configured');
-    return [];
+    return { articles: [], hasMore: false };
   }
+
+  // GNews max is capped at 100
+  const clampedPageSize = Math.min(pageSize, 100);
 
   const params = new URLSearchParams({
     apikey: apiKey,
     lang: 'en',
-    max: '20',
+    max: String(clampedPageSize),
+    page: String(page),
   });
 
   let endpoint = '/top-headlines';
@@ -54,7 +60,6 @@ export async function fetchFromGNews(
     params.set('to', filters.dateTo);
   }
 
-  // GNews only supports single category - use first from array or single category
   const category = filters.categories?.[0] ?? filters.category;
   if (category) {
     params.set('topic', mapCategoryToGNewsTopic(category));
@@ -62,12 +67,22 @@ export async function fetchFromGNews(
 
   try {
     const response = await axios.get<GNewsResponse>(`${BASE_URL}${endpoint}?${params}`);
-    return response.data.articles.map((article) =>
+    const { totalArticles, articles } = response.data;
+    const transformedArticles = articles.map((article) =>
       transformGNewsArticle(article, filters.category)
     );
+
+    const fetchedSoFar = page * clampedPageSize;
+    const hasMore = fetchedSoFar < totalArticles;
+
+    return {
+      articles: transformedArticles,
+      totalResults: totalArticles,
+      hasMore,
+    };
   } catch (error) {
     console.error('GNews fetch error:', error);
-    return [];
+    return { articles: [], hasMore: false };
   }
 }
 

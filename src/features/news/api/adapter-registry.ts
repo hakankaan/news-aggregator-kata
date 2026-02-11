@@ -1,4 +1,4 @@
-import type { Article, NewsSource, SearchFilters } from '../types';
+import type { AdapterResult, NewsSource, SearchFilters } from '../types';
 import { fetchFromNewsAPI } from './news-api.adapter';
 import { fetchFromGNews } from './gnews.adapter';
 import { fetchFromNYTimes } from './nytimes.adapter';
@@ -7,7 +7,7 @@ import { fetchFromNYTimes } from './nytimes.adapter';
 export interface NewsAdapter {
   readonly id: NewsSource;
   readonly name: string;
-  fetch: (filters: SearchFilters) => Promise<Article[]>;
+  fetch: (filters: SearchFilters, page: number, pageSize: number) => Promise<AdapterResult>;
 }
 
 
@@ -32,24 +32,31 @@ export class AdapterRegistry {
 
   async fetchFromSources(
     sourceIds: NewsSource[],
-    filters: SearchFilters
-  ): Promise<Article[]> {
+    filters: SearchFilters,
+    page: number = 1,
+    pageSize: number = 10
+  ): Promise<Map<NewsSource, AdapterResult>> {
     const enabledAdapters = sourceIds
       .map((id) => this.adapters.get(id))
       .filter((adapter): adapter is NewsAdapter => adapter !== undefined);
 
     const results = await Promise.allSettled(
-      enabledAdapters.map((adapter) => adapter.fetch(filters))
+      enabledAdapters.map((adapter) =>
+        adapter.fetch(filters, page, pageSize).then(result => ({
+          id: adapter.id,
+          result,
+        }))
+      )
     );
 
-    const articles: Article[] = [];
+    const resultMap = new Map<NewsSource, AdapterResult>();
     for (const result of results) {
       if (result.status === 'fulfilled') {
-        articles.push(...result.value);
+        resultMap.set(result.value.id, result.value.result);
       }
     }
 
-    return articles;
+    return resultMap;
   }
 }
 
@@ -58,17 +65,17 @@ export const adapterRegistry = new AdapterRegistry();
 adapterRegistry.register({
   id: 'newsapi',
   name: 'NewsAPI',
-  fetch: fetchFromNewsAPI,
+  fetch: (filters, page, pageSize) => fetchFromNewsAPI(filters, page, pageSize),
 });
 
 adapterRegistry.register({
   id: 'gnews',
   name: 'GNews',
-  fetch: fetchFromGNews,
+  fetch: (filters, page, pageSize) => fetchFromGNews(filters, page, pageSize),
 });
 
 adapterRegistry.register({
   id: 'nytimes',
   name: 'NY Times',
-  fetch: fetchFromNYTimes,
+  fetch: (filters, page) => fetchFromNYTimes(filters, page),
 });

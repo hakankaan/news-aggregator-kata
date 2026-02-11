@@ -1,38 +1,99 @@
-import type { Article, SearchFilters, UserPreferences, PaginatedResult } from '../types';
-import { DEFAULT_PAGE_SIZE } from '../types';
+import type {
+  Article,
+  SearchFilters,
+  UserPreferences,
+  PaginatedResult,
+  AggregatorPaginationState,
+  NewsSource,
+} from '../types';
+import { DEFAULT_PAGE_SIZE, NEWS_SOURCES } from '../types';
 import { adapterRegistry } from './adapter-registry';
 import { deduplicateArticles, sortByDate, filterBySourceNames } from './article-utils';
 
+export function createInitialPaginationState(): AggregatorPaginationState {
+  return NEWS_SOURCES.reduce((acc, source) => {
+    acc[source.id] = { page: 1, exhausted: false };
+    return acc;
+  }, {} as AggregatorPaginationState);
+}
 
-export async function fetchArticles(filters: SearchFilters): Promise<PaginatedResult<Article>> {
+export interface AggregatedResult extends PaginatedResult<Article> {
+  paginationState: AggregatorPaginationState;
+}
+
+export async function fetchArticles(
+  filters: SearchFilters,
+  paginationState: AggregatorPaginationState = createInitialPaginationState()
+): Promise<AggregatedResult> {
   const enabledSources = filters.sources ?? adapterRegistry.getIds();
-  const page = filters.page ?? 1;
   const pageSize = filters.pageSize ?? DEFAULT_PAGE_SIZE;
 
-  const articles = await adapterRegistry.fetchFromSources(enabledSources, filters);
+  const activeSources = enabledSources.filter(
+    (sourceId) => !paginationState[sourceId]?.exhausted
+  );
 
-  const uniqueArticles = deduplicateArticles(articles);
+  if (activeSources.length === 0) {
+    // All sources exhausted
+    return {
+      items: [],
+      totalCount: 0,
+      page: filters.page ?? 1,
+      pageSize,
+      hasNextPage: false,
+      paginationState,
+    };
+  }
+
+  const fetchPromises = activeSources.map(async (sourceId) => {
+    const adapter = adapterRegistry.get(sourceId);
+    if (!adapter) return { sourceId, result: { articles: [], hasMore: false } };
+
+    const sourcePage = paginationState[sourceId]?.page ?? 1;
+    const result = await adapter.fetch(filters, sourcePage, pageSize);
+    return { sourceId, result };
+  });
+
+  const results = await Promise.allSettled(fetchPromises);
+
+  const allArticles: Article[] = [];
+  const newPaginationState = { ...paginationState };
+
+  for (const result of results) {
+    if (result.status === 'fulfilled') {
+      const { sourceId, result: adapterResult } = result.value;
+      allArticles.push(...adapterResult.articles);
+
+      newPaginationState[sourceId] = {
+        page: (paginationState[sourceId]?.page ?? 1) + 1,
+        exhausted: !adapterResult.hasMore,
+      };
+    }
+  }
+
+  const uniqueArticles = deduplicateArticles(allArticles);
   const sortedArticles = sortByDate(uniqueArticles);
 
-  // Calculate pagination
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedArticles = sortedArticles.slice(startIndex, endIndex);
+  const hasNextPage = Object.entries(newPaginationState).some(
+    ([sourceId, state]) =>
+      enabledSources.includes(sourceId as NewsSource) && !state.exhausted
+  );
 
   return {
-    items: paginatedArticles,
+    items: sortedArticles,
     totalCount: sortedArticles.length,
-    page,
+    page: filters.page ?? 1,
     pageSize,
-    hasNextPage: endIndex < sortedArticles.length,
+    hasNextPage,
+    paginationState: newPaginationState,
   };
 }
 
 
 export async function fetchPersonalizedFeed(
   preferences: UserPreferences,
-  pagination?: { page?: number; pageSize?: number }
-): Promise<PaginatedResult<Article>> {
+  pagination?: { page?: number; pageSize?: number },
+  paginationState: AggregatorPaginationState = createInitialPaginationState()
+): Promise<AggregatedResult> {
   const page = pagination?.page ?? 1;
   const pageSize = pagination?.pageSize ?? DEFAULT_PAGE_SIZE;
 
@@ -49,9 +110,8 @@ export async function fetchPersonalizedFeed(
     filters.categories = preferences.preferredCategories;
   }
 
-  const result = await fetchArticles(filters);
+  const result = await fetchArticles(filters, paginationState);
 
-  // Apply source name filtering if preferences exist
   if (preferences.preferredSourceNames.length > 0) {
     const filteredItems = filterBySourceNames(result.items, preferences.preferredSourceNames);
     return {

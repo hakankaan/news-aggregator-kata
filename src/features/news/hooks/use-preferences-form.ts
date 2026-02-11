@@ -1,10 +1,6 @@
 import { useState, useCallback } from 'react';
 import { DEFAULT_PREFERENCES, type NewsSource, type UserPreferences } from '../types';
 
-/**
- * Headless hook for managing preferences form state.
- * Separates form logic from UI presentation.
- */
 export function usePreferencesForm(initialPreferences: UserPreferences) {
   const [draft, setDraft] = useState<UserPreferences>(initialPreferences);
   const [sourceNameInput, setSourceNameInput] = useState('');

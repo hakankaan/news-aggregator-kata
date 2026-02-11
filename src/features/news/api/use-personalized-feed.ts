@@ -1,14 +1,14 @@
 import { useInfiniteQuery, infiniteQueryOptions } from '@tanstack/react-query';
-import type { UserPreferences, Article, PaginatedResult } from '../types';
-import { fetchPersonalizedFeed } from './aggregator';
+import type { UserPreferences, AggregatorPaginationState } from '../types';
+import { fetchPersonalizedFeed, createInitialPaginationState, type AggregatedResult } from './aggregator';
 
 export function personalizedFeedInfiniteQueryOptions(preferences: UserPreferences) {
   return infiniteQueryOptions({
     queryKey: ['articles', 'personalized', 'infinite', preferences] as const,
-    queryFn: ({ pageParam }) => fetchPersonalizedFeed(preferences, { page: pageParam }),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage: PaginatedResult<Article>) =>
-      lastPage.hasNextPage ? lastPage.page + 1 : undefined,
+    queryFn: ({ pageParam }) => fetchPersonalizedFeed(preferences, {}, pageParam),
+    initialPageParam: createInitialPaginationState(),
+    getNextPageParam: (lastPage: AggregatedResult): AggregatorPaginationState | undefined =>
+      lastPage.hasNextPage ? lastPage.paginationState : undefined,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

@@ -1,6 +1,5 @@
 export type NewsSource = 'newsapi' | 'gnews' | 'nytimes';
 
-/** Available news sources with display names */
 export const NEWS_SOURCES: { id: NewsSource; name: string }[] = [
   { id: 'newsapi', name: 'NewsAPI' },
   { id: 'gnews', name: 'GNews' },
@@ -31,6 +30,19 @@ export interface PaginatedResult<T> {
   pageSize: number;
   hasNextPage: boolean;
 }
+
+export interface AdapterResult {
+  articles: Article[];
+  totalResults?: number;
+  hasMore: boolean;
+}
+
+export interface SourcePaginationState {
+  page: number;
+  exhausted: boolean;
+}
+
+export type AggregatorPaginationState = Record<NewsSource, SourcePaginationState>;
 
 export interface SearchFilters {
   keyword?: string;

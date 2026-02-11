@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { env } from '@/config/env';
-import type { Article, SearchFilters } from '../types';
+import type { AdapterResult, Article, SearchFilters } from '../types';
 import { generateArticleId } from './article-utils';
 
 interface NewsAPIArticle {
@@ -26,17 +26,23 @@ interface NewsAPIResponse {
 const BASE_URL = 'https://newsapi.org/v2';
 
 export async function fetchFromNewsAPI(
-  filters: SearchFilters
-): Promise<Article[]> {
+  filters: SearchFilters,
+  page: number = 1,
+  pageSize: number = 20
+): Promise<AdapterResult> {
   const apiKey = env.NEWSAPI_KEY;
   if (!apiKey) {
     console.warn('NewsAPI key not configured');
-    return [];
+    return { articles: [], hasMore: false };
   }
+
+  // NewsAPI pageSize is capped at 100
+  const clampedPageSize = Math.min(pageSize, 100);
 
   const params = new URLSearchParams({
     apiKey,
-    pageSize: '20',
+    pageSize: String(clampedPageSize),
+    page: String(page),
   });
 
   let endpoint = '/everything';
@@ -56,7 +62,6 @@ export async function fetchFromNewsAPI(
     params.set('to', filters.dateTo);
   }
 
-  // NewsAPI only supports single category - use first from array or single category
   const category = filters.categories?.[0] ?? filters.category;
   if (category && !filters.keyword) {
     params.set('category', category);
@@ -64,12 +69,22 @@ export async function fetchFromNewsAPI(
 
   try {
     const response = await axios.get<NewsAPIResponse>(`${BASE_URL}${endpoint}?${params}`);
-    return response.data.articles.map((article) =>
+    const { totalResults, articles } = response.data;
+    const transformedArticles = articles.map((article) =>
       transformNewsAPIArticle(article, filters.category)
     );
+
+    const fetchedSoFar = page * clampedPageSize;
+    const hasMore = fetchedSoFar < totalResults;
+
+    return {
+      articles: transformedArticles,
+      totalResults,
+      hasMore,
+    };
   } catch (error) {
     console.error('NewsAPI fetch error:', error);
-    return [];
+    return { articles: [], hasMore: false };
   }
 }
 
