@@ -1,26 +1,24 @@
-import { queryOptions, useQuery } from '@tanstack/react-query';
-import type { UserPreferences } from '../types';
+import { useInfiniteQuery, infiniteQueryOptions } from '@tanstack/react-query';
+import type { UserPreferences, Article, PaginatedResult } from '../types';
 import { fetchPersonalizedFeed } from './aggregator';
 
-export function personalizedFeedQueryOptions(preferences: UserPreferences) {
-  return queryOptions({
-    queryKey: ['articles', 'personalized', preferences],
-    queryFn: () => fetchPersonalizedFeed(preferences),
+export function personalizedFeedInfiniteQueryOptions(preferences: UserPreferences) {
+  return infiniteQueryOptions({
+    queryKey: ['articles', 'personalized', 'infinite', preferences] as const,
+    queryFn: ({ pageParam }) => fetchPersonalizedFeed(preferences, { page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: PaginatedResult<Article>) =>
+      lastPage.hasNextPage ? lastPage.page + 1 : undefined,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 
-type UsePersonalizedFeedOptions = {
+interface UseInfinitePersonalizedFeedOptions {
   preferences: UserPreferences;
-  queryConfig?: Omit<ReturnType<typeof personalizedFeedQueryOptions>, 'queryKey' | 'queryFn'>;
-};
+}
 
-export function usePersonalizedFeed({
+export function useInfinitePersonalizedFeed({
   preferences,
-  queryConfig,
-}: UsePersonalizedFeedOptions) {
-  return useQuery({
-    ...personalizedFeedQueryOptions(preferences),
-    ...queryConfig,
-  });
+}: UseInfinitePersonalizedFeedOptions) {
+  return useInfiniteQuery(personalizedFeedInfiniteQueryOptions(preferences));
 }

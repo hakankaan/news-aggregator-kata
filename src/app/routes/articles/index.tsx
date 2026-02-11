@@ -1,18 +1,27 @@
 import { useState } from 'react';
-import { useSearchArticles } from '@/features/news/api/use-search-articles';
+import { useInfiniteSearchArticles } from '@/features/news/api/use-infinite-search-articles';
 import type { SearchFilters } from '@/features/news/types';
 import {
-  ArticleList,
+  InfiniteArticleList,
   SearchBar,
   FilterPanel,
 } from '@/features/news/components';
 
 const NewsRoute = () => {
-  const [filters, setFilters] = useState<SearchFilters>({});
+  const [filters, setFilters] = useState<Omit<SearchFilters, 'page'>>({});
 
-  const { data: articles = [], isLoading } = useSearchArticles({
-    filters,
-  });
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error,
+  } = useInfiniteSearchArticles({ filters });
+
+  // Flatten all pages into a single array of articles
+  const articles = data?.pages.flatMap((page) => page.items) ?? [];
+  const totalCount = data?.pages[0]?.totalCount ?? 0;
 
   const handleKeywordChange = (keyword: string) => {
     setFilters((prev) => ({ ...prev, keyword: keyword || undefined }));
@@ -37,8 +46,22 @@ const NewsRoute = () => {
         <FilterPanel filters={filters} onFiltersChange={setFilters} />
       </div>
 
-      {/* Articles */}
-      <ArticleList articles={articles} isLoading={isLoading} />
+      {/* Results count */}
+      {!isLoading && totalCount > 0 && (
+        <p className="text-muted-foreground mb-4 text-sm">
+          Showing {articles.length} of {totalCount} articles
+        </p>
+      )}
+
+      {/* Articles with Infinite Scroll */}
+      <InfiniteArticleList
+        articles={articles}
+        isLoading={isLoading}
+        isFetchingNextPage={isFetchingNextPage}
+        hasNextPage={hasNextPage ?? false}
+        fetchNextPage={fetchNextPage}
+        error={error}
+      />
     </div>
   );
 };

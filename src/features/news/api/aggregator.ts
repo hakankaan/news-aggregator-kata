@@ -1,22 +1,45 @@
-import type { Article, SearchFilters, UserPreferences } from '../types';
+import type { Article, SearchFilters, UserPreferences, PaginatedResult } from '../types';
+import { DEFAULT_PAGE_SIZE } from '../types';
 import { adapterRegistry } from './adapter-registry';
 import { deduplicateArticles, sortByDate, filterBySourceNames } from './article-utils';
 
 
-export async function fetchArticles(filters: SearchFilters): Promise<Article[]> {
+export async function fetchArticles(filters: SearchFilters): Promise<PaginatedResult<Article>> {
   const enabledSources = filters.sources ?? adapterRegistry.getIds();
+  const page = filters.page ?? 1;
+  const pageSize = filters.pageSize ?? DEFAULT_PAGE_SIZE;
 
   const articles = await adapterRegistry.fetchFromSources(enabledSources, filters);
 
   const uniqueArticles = deduplicateArticles(articles);
-  return sortByDate(uniqueArticles);
+  const sortedArticles = sortByDate(uniqueArticles);
+
+  // Calculate pagination
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedArticles = sortedArticles.slice(startIndex, endIndex);
+
+  return {
+    items: paginatedArticles,
+    totalCount: sortedArticles.length,
+    page,
+    pageSize,
+    hasNextPage: endIndex < sortedArticles.length,
+  };
 }
 
 
 export async function fetchPersonalizedFeed(
-  preferences: UserPreferences
-): Promise<Article[]> {
-  const filters: SearchFilters = {};
+  preferences: UserPreferences,
+  pagination?: { page?: number; pageSize?: number }
+): Promise<PaginatedResult<Article>> {
+  const page = pagination?.page ?? 1;
+  const pageSize = pagination?.pageSize ?? DEFAULT_PAGE_SIZE;
+
+  const filters: SearchFilters = {
+    page,
+    pageSize,
+  };
 
   if (preferences.preferredSources.length > 0) {
     filters.sources = preferences.preferredSources;
@@ -26,9 +49,19 @@ export async function fetchPersonalizedFeed(
     filters.categories = preferences.preferredCategories;
   }
 
-  const articles = await fetchArticles(filters);
+  const result = await fetchArticles(filters);
 
-  return filterBySourceNames(articles, preferences.preferredSourceNames);
+  // Apply source name filtering if preferences exist
+  if (preferences.preferredSourceNames.length > 0) {
+    const filteredItems = filterBySourceNames(result.items, preferences.preferredSourceNames);
+    return {
+      ...result,
+      items: filteredItems,
+      totalCount: filteredItems.length,
+    };
+  }
+
+  return result;
 }
 
 export function getArticleById(

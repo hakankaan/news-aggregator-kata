@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { usePersonalizedFeed } from '@/features/news/api/use-personalized-feed';
+import { useInfinitePersonalizedFeed } from '@/features/news/api/use-personalized-feed';
 import { usePreferences } from '@/features/news/stores/use-preferences';
-import { ArticleList, PreferencesPanel } from '@/features/news/components';
+import { InfiniteArticleList, PreferencesPanel } from '@/features/news/components';
 import { Link } from '@/components/ui/link';
 import { paths } from '@/config/paths';
 
@@ -11,9 +11,18 @@ const FeedRoute = () => {
   const [showPreferences, setShowPreferences] = useState(false);
   const { preferences } = usePreferences();
 
-  const { data: articles = [], isLoading } = usePersonalizedFeed({
-    preferences,
-  });
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    error,
+  } = useInfinitePersonalizedFeed({ preferences });
+
+  // Flatten all pages into a single array of articles
+  const articles = data?.pages.flatMap((page) => page.items) ?? [];
+  const totalCount = data?.pages[0]?.totalCount ?? 0;
 
   const hasPreferences =
     preferences.preferredSources.length > 0 ||
@@ -67,9 +76,23 @@ const FeedRoute = () => {
         </div>
       )}
 
-      {/* Articles */}
+      {/* Results count */}
+      {hasPreferences && !isLoading && totalCount > 0 && (
+        <p className="text-muted-foreground mb-4 text-sm">
+          Showing {articles.length} of {totalCount} articles
+        </p>
+      )}
+
+      {/* Articles with Infinite Scroll */}
       {hasPreferences && (
-        <ArticleList articles={articles} isLoading={isLoading} />
+        <InfiniteArticleList
+          articles={articles}
+          isLoading={isLoading}
+          isFetchingNextPage={isFetchingNextPage}
+          hasNextPage={hasNextPage ?? false}
+          fetchNextPage={fetchNextPage}
+          error={error}
+        />
       )}
 
       {/* Preferences Modal */}

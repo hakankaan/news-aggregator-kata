@@ -24,6 +24,14 @@ export interface Article {
   url: string;
 }
 
+export interface PaginatedResult<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  hasNextPage: boolean;
+}
+
 export interface SearchFilters {
   keyword?: string;
   dateFrom?: string;
@@ -31,7 +39,11 @@ export interface SearchFilters {
   category?: string;
   categories?: string[];
   sources?: NewsSource[];
+  page?: number;
+  pageSize?: number;
 }
+
+export const DEFAULT_PAGE_SIZE = 12;
 
 export interface UserPreferences {
   preferredSources: NewsSource[];
