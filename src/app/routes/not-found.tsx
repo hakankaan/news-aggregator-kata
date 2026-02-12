@@ -1,7 +1,9 @@
 import { Link } from '@/components/ui/link';
 import { paths } from '@/config/paths';
+import { useDocumentTitle } from '@/lib/use-document-title';
 
 const NotFoundRoute = () => {
+  useDocumentTitle('Page Not Found');
   return (
     <div className="mt-52 flex flex-col items-center font-semibold">
       <h1>404 - Not Found</h1>

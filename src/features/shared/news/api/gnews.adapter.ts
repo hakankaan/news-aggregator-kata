@@ -19,7 +19,7 @@ interface GNewsArticle {
   };
 }
 
-interface GNewsResponse {
+export interface GNewsResponse {
   totalArticles: number;
   articles: GNewsArticle[];
 }

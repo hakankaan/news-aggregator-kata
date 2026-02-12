@@ -17,7 +17,7 @@ interface NewsAPIArticle {
   content: string | null;
 }
 
-interface NewsAPIResponse {
+export interface NewsAPIResponse {
   status: string;
   totalResults: number;
   articles: NewsAPIArticle[];

@@ -8,8 +8,10 @@ import { PreferencesProvider } from '@/features/feed/stores/preferences-provider
 import { InfiniteArticleList } from '@/features/shared/news/components';
 import { Link } from '@/components/ui/link';
 import { paths } from '@/config/paths';
+import { useDocumentTitle } from '@/lib/use-document-title';
 
 const FeedContent = () => {
+  useDocumentTitle('My Feed');
   const [showPreferences, setShowPreferences] = useState(false);
   const { preferences } = usePreferences();
 

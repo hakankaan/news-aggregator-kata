@@ -3,8 +3,10 @@ import { useInfiniteSearchArticles } from '@/features/articles/api/use-infinite-
 import type { SearchFilters } from '@/features/articles/types';
 import { SearchBar, FilterPanel } from '@/features/articles/components';
 import { InfiniteArticleList } from '@/features/shared/news/components';
+import { useDocumentTitle } from '@/lib/use-document-title';
 
 const NewsRoute = () => {
+  useDocumentTitle('All Articles');
   const [filters, setFilters] = useState<Omit<SearchFilters, 'page'>>({});
 
   const {

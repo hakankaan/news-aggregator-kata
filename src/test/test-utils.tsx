@@ -2,6 +2,7 @@
 import { render, type RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement, ReactNode } from 'react';
+import { MemoryRouter, type MemoryRouterProps } from 'react-router';
 import { PreferencesProvider } from '@/features/feed/stores/preferences-provider';
 
 function createTestQueryClient() {
@@ -17,22 +18,34 @@ function createTestQueryClient() {
 
 interface AllProvidersProps {
   children: ReactNode;
+  initialEntries?: MemoryRouterProps['initialEntries'];
 }
 
-function AllProviders({ children }: AllProvidersProps) {
+function AllProviders({ children, initialEntries = ['/'] }: AllProvidersProps) {
   const queryClient = createTestQueryClient();
   return (
-    <QueryClientProvider client={queryClient}>
-      <PreferencesProvider>{children}</PreferencesProvider>
-    </QueryClientProvider>
+    <MemoryRouter initialEntries={initialEntries}>
+      <QueryClientProvider client={queryClient}>
+        <PreferencesProvider>{children}</PreferencesProvider>
+      </QueryClientProvider>
+    </MemoryRouter>
   );
+}
+
+interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+  initialEntries?: MemoryRouterProps['initialEntries'];
 }
 
 function customRender(
   ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
+  { initialEntries, ...options }: CustomRenderOptions = {}
 ) {
-  return render(ui, { wrapper: AllProviders, ...options });
+  return render(ui, {
+    wrapper: ({ children }) => (
+      <AllProviders initialEntries={initialEntries}>{children}</AllProviders>
+    ),
+    ...options,
+  });
 }
 
 export * from '@testing-library/react';
