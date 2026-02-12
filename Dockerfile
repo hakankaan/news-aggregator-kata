@@ -12,13 +12,7 @@ RUN npm ci
 # Copy source files
 COPY . .
 
-# Build arguments for environment variables
-ARG VITE_APP_NEWSAPI_KEY=""
-ARG VITE_APP_GNEWS_KEY=""
-ARG VITE_APP_NYTIMES_KEY=""
-ARG VITE_APP_APP_URL="http://localhost:3000"
-
-# Build the application
+# Build without secrets (they're injected at runtime)
 RUN npm run build
 
 # Production stage
@@ -30,11 +24,15 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Expose port 80
 EXPOSE 80
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Use entrypoint to inject env vars at runtime
+ENTRYPOINT ["/docker-entrypoint.sh"]
 
 # Development stage
 FROM node:22-alpine AS development
